@@ -1,0 +1,174 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
+class UserController extends Controller
+{
+    /**
+     * Create a new User Controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('jwt.verify');
+        $this->middleware('token.verify');
+        $this->middleware(['role:cashier']);
+    }
+
+    public function index(Request $request)
+    {
+        $users = User::latest()->when($request->q, function ($users) use ($request) {
+            $users = $users->where('name', 'LIKE', '%' . $request->q . '%');
+        })->paginate(10);
+
+        $status = 200;
+
+        return response()->json(compact('users'), $status);
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|between:2,256',
+            'email' => 'required|string|email|max:256|unique:users,email',
+            'gender' => 'required|in:male,female',
+            'place_of_birth' => 'nullable|string|between:2,256',
+            'date_of_birth' => 'nullable|date_format:Y-m-d|before:today',
+            'address' => "required|between:2,256",
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png',
+            'password' => 'required|string|confirmed|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $filename = null;
+
+        if ($request->hasFile('photo')) {
+            $filename = Str::random(6) . '-' . $request->email . '.jpg';
+            $file = $request->file('photo');
+            $file->move(base_path('public/images/profiles'), $filename);
+        }
+
+        $user = User::create(
+            array_merge(
+                $validator->validated(),
+                [
+                    'photo' => $filename,
+                    'password' => bcrypt($request->password)
+                ]
+            )
+        );
+
+        $user->assignRole($request->role);
+
+        $message = 'User succesfully created!';
+        $status = 200;
+
+        return response()->json(compact('message'), $status);
+    }
+
+    public function show($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $status = 200;
+
+            return response()->json(compact('user'), $status);
+        } catch (ModelNotFoundException $e) {
+            $message = 'User not found!';
+            $status = 404;
+
+            return response()->json(compact('message'), $status);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|between:2,256',
+            'email' => 'nullable|string|email|max:256|unique:users,email',
+            'gender' => 'nullable|in:male,female',
+            'place_of_birth' => 'nullable|string|between:2,256',
+            'date_of_birth' => 'nullable|date_format:Y-m-d|before:today',
+            'address' => "nullable|between:2,256",
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png',
+            'password' => 'nullable|string|confirmed|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        try {
+            $user = User::findOrFail($id);
+
+            $password = $request->password != '' ? app('hash')->make($request->password) : $user->password;
+
+            $filename = $user->photo;
+
+            if ($request->hasFile('photo')) {
+                $filename = Str::random(6) . '-' . $user->email . '.jpg';
+                $file = $request->file('photo');
+                $file->move(base_path('public/images/profiles'), $filename);
+
+                unlink(base_path('public/images/profiles/' . $user->photo));
+            }
+
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->gender = $request->gender;
+            $user->place_of_birth = $request->place_of_birth;
+            $user->date_of_birth = $request->date_of_birth;
+            $user->address = $request->address;
+            $user->photo = $filename;
+            $user->password = $password;
+
+            $user->assignRole($request->role);
+
+            $user->save();
+
+            $message = 'User successfully updated!';
+            $status = 200;
+
+            return response()->json(compact('message'), $status);
+        } catch (ModelNotFoundException $e) {
+            $message = 'User not found!';
+            $status = 404;
+
+            return response()->json(compact('message'), $status);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            if ($user->photo) {
+                unlink(base_path('public/images/profiles/' . $user->photo));
+            }
+
+            $user->delete();
+
+            $message = 'User successfully deleted!';
+            $status = 200;
+
+            return response()->json(compact('message'), $status);
+        } catch (ModelNotFoundException $e) {
+            $message = 'User not found!';
+            $status = 404;
+
+            return response()->json(compact('message'), $status);
+        }
+    }
+}
