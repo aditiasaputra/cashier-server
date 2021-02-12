@@ -22,4 +22,9 @@ class Gift extends Model
      * @var array
      */
     protected $hidden = [];
+
+    public function claimGifts()
+    {
+        return $this->hasMany(ClaimGift::class);
+    }
 }
