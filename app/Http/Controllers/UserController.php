@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -19,15 +21,17 @@ class UserController extends Controller
     {
         $this->middleware('auth:api');
         $this->middleware('jwt.verify');
-        $this->middleware('token.verify');
+        // $this->middleware('token.verify');
         $this->middleware(['role:cashier']);
     }
 
     public function index(Request $request)
     {
-        $users = User::latest()->when($request->q, function ($users) use ($request) {
-            $users = $users->where('name', 'LIKE', '%' . $request->q . '%');
-        })->paginate(10);
+        // $users = User::latest()->when($request->q, function ($users) use ($request) {
+        //     $users = $users->where('name', 'LIKE', '%' . $request->q . '%');
+        // })->paginate($request->per_page);
+
+        $users = User::select('users.*', 'roles.name as role')->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')->join('roles', 'model_has_roles.role_id', '=', 'roles.id')->get();
 
         $status = 200;
 
@@ -43,8 +47,9 @@ class UserController extends Controller
             'place_of_birth' => 'nullable|string|between:2,256',
             'date_of_birth' => 'nullable|date_format:Y-m-d|before:today',
             'address' => "required|between:2,256",
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'password' => 'required|string|confirmed|min:6',
+            'role' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -54,20 +59,20 @@ class UserController extends Controller
         $filename = null;
 
         if ($request->hasFile('photo')) {
-            $filename = Str::random(6) . '-' . $request->email . '.jpg';
-            $file = $request->file('photo');
-            $file->move(base_path('public/images/profiles'), $filename);
+            $file = $request->file('photo')->store('profiles');
+            $filename = $file;
         }
 
-        $user = User::create(
-            array_merge(
-                $validator->validated(),
-                [
-                    'photo' => $filename,
-                    'password' => bcrypt($request->password)
-                ]
-            )
-        );
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'gender' => $request->gender,
+            'place_of_birth' => $request->place_of_birth,
+            'date_of_birth' => $request->date_of_birth,
+            'address' => $request->address,
+            'photo' => $filename,
+            'password' => $request->password,
+        ]);
 
         $user->assignRole($request->role);
 
@@ -96,13 +101,14 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string|between:2,256',
-            'email' => 'nullable|string|email|max:256|unique:users,email',
+            'email' => 'nullable|string|email|max:256',
             'gender' => 'nullable|in:male,female',
             'place_of_birth' => 'nullable|string|between:2,256',
             'date_of_birth' => 'nullable|date_format:Y-m-d|before:today',
             'address' => "nullable|between:2,256",
             'photo' => 'nullable|image|mimes:jpg,jpeg,png',
             'password' => 'nullable|string|confirmed|min:6',
+            'role' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -112,16 +118,21 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
 
-            $password = $request->password != '' ? app('hash')->make($request->password) : $user->password;
+            $password = $request->password != '' ? $request->password : $user->password;
 
             $filename = $user->photo;
 
-            if ($request->hasFile('photo')) {
-                $filename = Str::random(6) . '-' . $user->email . '.jpg';
-                $file = $request->file('photo');
-                $file->move(base_path('public/images/profiles'), $filename);
+            $imageName = explode('/', $filename);
+            $imageName = end($imageName);
 
-                unlink(base_path('public/images/profiles/' . $user->photo));
+            if (Storage::exists('profiles/' . $imageName)) {
+                Storage::delete('profiles/' . $imageName);
+            }
+
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo')->store('profiles');
+
+                $filename = $file;
             }
 
             $user->name = $request->name;
@@ -154,8 +165,13 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
 
-            if ($user->photo) {
-                unlink(base_path('public/images/profiles/' . $user->photo));
+            $filename = $user->photo;
+
+            $imageName = explode('/', $filename);
+            $imageName = end($imageName);
+
+            if (Storage::exists('profiles/' . $imageName)) {
+                Storage::delete('profiles/' . $imageName);
             }
 
             $user->delete();

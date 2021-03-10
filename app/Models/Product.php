@@ -23,6 +23,11 @@ class Product extends Model
      */
     protected $hidden = [];
 
+    public function getPhotoAttribute($value)
+    {
+        return $value === null ? 'No Photo' : asset('storage/' . $value);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Validator;
@@ -31,15 +32,23 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function createNewToken($token)
+    protected function createNewToken($ip, $token)
     {
+        $user = User::find(Auth::user()->id);
+
+        $user->update([
+            'last_login_at' => Carbon::now()->toDateTimeString(),
+            'last_login_ip' => $ip
+        ]);
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => Auth::factory()->getTTL() * 60,
             'user' => Auth::user(),
-            'roles' => User::find(Auth::user()->id)->getRoleNames()->all()
-        ])->withCookie('token', $token, (60 * 24 * 7), '/');
+            'roles' => $user->getRoleNames()->all()
+        ]);
+        // ])->withCookie('token', $token, (60 * 24 * 7), '/');
     }
 
     /**
@@ -62,7 +71,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized!'], 401);
         }
 
-        return $this->createNewToken($token);
+        return $this->createNewToken($request->getClientIp(), $token);
     }
 
     /**
@@ -88,7 +97,7 @@ class AuthController extends Controller
 
         $user = User::create(array_merge(
             $validator->validated(),
-            ['password' => bcrypt($request->password)]
+            ['password' => $request->password]
         ));
 
         $user->assignRole('customer');
@@ -116,9 +125,9 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function refresh()
+    public function refresh(Request $request)
     {
-        return $this->createNewToken(Auth::refresh());
+        return $this->createNewToken($request->getClientIp(), Auth::refresh());
     }
 
     /**
@@ -128,6 +137,7 @@ class AuthController extends Controller
      */
     public function profile()
     {
-        return response()->json(Auth::user());
+        $roles = User::find(Auth::user()->id)->getRoleNames()->all();
+        return response()->json(['user' => Auth::user(), 'roles' => $roles]);
     }
 }

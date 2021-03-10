@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -25,9 +26,11 @@ class CategoryController extends Controller
 
     public function index(Request $request)
     {
-        $categories = Category::latest()->when($request->q, function ($categories) use ($request) {
-            $categories = $categories->where('name', 'LIKE', '%' . $request->q . '%');
-        })->paginate(10);
+        // $categories = Category::latest()->when($request->q, function ($categories) use ($request) {
+        //     $categories = $categories->where('name', 'LIKE', '%' . $request->q . '%');
+        // })->paginate(10);
+
+        $categories = Category::all();
 
         $status = 200;
 
@@ -49,9 +52,8 @@ class CategoryController extends Controller
         $filename = null;
 
         if ($request->hasFile('photo')) {
-            $filename = Str::random(6) . '-' . $request->name . '.jpg';
-            $file = $request->file('photo');
-            $file->move(base_path('public/images/categories'), $filename);
+            $file = $request->file('photo')->store('categories');
+            $filename = $file;
         }
 
         $category = Category::create(array_merge(
@@ -99,12 +101,17 @@ class CategoryController extends Controller
 
             $filename = $category->photo;
 
-            if ($request->hasFile('photo')) {
-                $filename = Str::random(6) . '-' . $category->name . '.jpg';
-                $file = $request->file('photo');
-                $file->move(base_path('public/images/categories'), $filename);
+            $imageName = explode('/', $filename);
+            $imageName = end($imageName);
 
-                unlink(base_path('public/images/categories/' . $category->photo));
+            if (Storage::exists('categories/' . $imageName)) {
+                Storage::delete('categories/' . $imageName);
+            }
+
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo')->store('categories');
+
+                $filename = $file;
             }
 
             $category->name = $request->name;
@@ -130,8 +137,13 @@ class CategoryController extends Controller
         try {
             $category = Category::findOrFail($id);
 
-            if ($category->photo) {
-                unlink(base_path('public/images/categories/' . $category->photo));
+            $filename = $category->photo;
+
+            $imageName = explode('/', $filename);
+            $imageName = end($imageName);
+
+            if (Storage::exists('categories/' . $imageName)) {
+                Storage::delete('categories/' . $imageName);
             }
 
             $category->delete();

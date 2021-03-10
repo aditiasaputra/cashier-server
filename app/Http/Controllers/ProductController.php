@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -25,9 +26,11 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $products = Product::latest()->when($request->q, function ($product) use ($request) {
-            $product = $product->where('name', 'LIKE', '%' . $request->q . '%');
-        })->paginate(10);
+        // $products = Product::latest()->when($request->q, function ($product) use ($request) {
+        //     $product = $product->where('name', 'LIKE', '%' . $request->q . '%');
+        // })->paginate(10);
+
+        $products = Product::all();
 
         $status = 200;
 
@@ -51,9 +54,8 @@ class ProductController extends Controller
         $filename = null;
 
         if ($request->hasFile('photo')) {
-            $filename = Str::random(6) . '-' . $request->name . '.jpg';
-            $file = $request->file('photo');
-            $file->move(base_path('public/images/products'), $filename);
+            $file = $request->file('photo')->store('products');
+            $filename = $file;
         }
 
         $product = Product::create(array_merge(
@@ -103,12 +105,17 @@ class ProductController extends Controller
 
             $filename = $product->photo;
 
-            if ($request->hasFile('photo')) {
-                $filename = Str::random(6) . '-' . $product->name . '.jpg';
-                $file = $request->file('photo');
-                $file->move(base_path('public/images/products'), $filename);
+            $imageName = explode('/', $filename);
+            $imageName = end($imageName);
 
-                unlink(base_path('public/images/products/' . $product->photo));
+            if (Storage::exists('products/' . $imageName)) {
+                Storage::delete('products/' . $imageName);
+            }
+
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo')->store('products');
+
+                $filename = $file;
             }
 
             $product->name = $request->name;
@@ -136,8 +143,13 @@ class ProductController extends Controller
         try {
             $product = Product::findOrFail($id);
 
-            if ($product->photo) {
-                unlink(base_path('public/images/products/' . $product->photo));
+            $filename = $product->photo;
+
+            $imageName = explode('/', $filename);
+            $imageName = end($imageName);
+
+            if (Storage::exists('products/' . $imageName)) {
+                Storage::delete('products/' . $imageName);
             }
 
             $product->delete();

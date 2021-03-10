@@ -23,6 +23,11 @@ class Gift extends Model
      */
     protected $hidden = [];
 
+    public function getPhotoAttribute($value)
+    {
+        return $value === null ? 'No Photo' : asset('storage/' . $value);
+    }
+
     public function claimGifts()
     {
         return $this->hasMany(ClaimGift::class);

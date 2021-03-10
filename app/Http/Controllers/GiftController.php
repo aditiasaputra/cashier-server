@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Gift;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -25,9 +26,11 @@ class GiftController extends Controller
 
     public function index(Request $request)
     {
-        $gifts = Gift::latest()->when($request->q, function ($gifts) use ($request) {
-            $gifts = $gifts->where('name', 'LIKE', '%' . $request->q . '%');
-        })->paginate(10);
+        // $gifts = Gift::latest()->when($request->q, function ($gifts) use ($request) {
+        //     $gifts = $gifts->where('name', 'LIKE', '%' . $request->q . '%');
+        // })->paginate(10);
+
+        $gifts = Gift::all();
 
         $status = 200;
 
@@ -50,9 +53,8 @@ class GiftController extends Controller
         $filename = null;
 
         if ($request->hasFile('photo')) {
-            $filename = Str::random(6) . '-' . $request->name . '.jpg';
-            $file = $request->file('photo');
-            $file->move(base_path('public/images/gifts'), $filename);
+            $file = $request->file('photo')->store('gifts');
+            $filename = $file;
         }
 
         $gift = Gift::create(array_merge(
@@ -101,12 +103,17 @@ class GiftController extends Controller
 
             $filename = $gift->photo;
 
-            if ($request->hasFile('photo')) {
-                $filename = Str::random(6) . '-' . $gift->name . '.jpg';
-                $file = $request->file('photo');
-                $file->move(base_path('public/images/gifts'), $filename);
+            $imageName = explode('/', $filename);
+            $imageName = end($imageName);
 
-                unlink(base_path('public/images/gifts/' . $gift->photo));
+            if (Storage::exists('gifts/' . $imageName)) {
+                Storage::delete('gifts/' . $imageName);
+            }
+
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo')->store('gifts');
+
+                $filename = $file;
             }
 
             $gift->name = $request->name;
@@ -133,8 +140,13 @@ class GiftController extends Controller
         try {
             $gift = Gift::findOrFail($id);
 
-            if ($gift->photo) {
-                unlink(base_path('public/images/gifts/' . $gift->photo));
+            $filename = $gift->photo;
+
+            $imageName = explode('/', $filename);
+            $imageName = end($imageName);
+
+            if (Storage::exists('gifts/' . $imageName)) {
+                Storage::delete('gifts/' . $imageName);
             }
 
             $gift->delete();

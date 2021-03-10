@@ -40,7 +40,7 @@ class UserSeeder extends Seeder
             "name" => "Cashier DEF",
             "email" => "cashierdef@mail.com",
             "gender" => "female",
-            "place_of_birth" => "Jakarta",
+            "place_of_birth" => "Jawa Barat",
             "date_of_birth" => "1986-12-01",
             "address" => "Jl. D.I Pandjaitan 10 Jakarta",
             "password" => bcrypt("def123")
@@ -66,11 +66,128 @@ class UserSeeder extends Seeder
             "name" => "Adam Smith",
             "email" => "adamsmith@gmail.com",
             "gender" => "male",
-            "place_of_birth" => "California",
+            "place_of_birth" => "Sumatera Selatan",
             "date_of_birth" => "1980-10-20",
             "address" => "Jl. Gatot Subroto No. 75 Jakarta",
             "point" => 50,
             "password" => bcrypt("adamsmith")
+        ]);
+        $user->assignRole($role2);
+
+        $user = User::create([
+            'id' => 5,
+            "name" => "John Doe",
+            "email" => "johndoe@gmail.com",
+            "gender" => "male",
+            "place_of_birth" => "Jawa Timur",
+            "date_of_birth" => "1981-10-20",
+            "address" => "Jl. Gatot Subroto No. 100 Bandung",
+            "point" => 80,
+            "password" => bcrypt("johndoe")
+        ]);
+        $user->assignRole($role2);
+
+        $user = User::create([
+            'id' => 6,
+            "name" => "Jane Doe",
+            "email" => "janedoe@gmail.com",
+            "gender" => "female",
+            "place_of_birth" => "Lampung",
+            "date_of_birth" => "1978-05-21",
+            "address" => "Jl. Sultan Hasannudin No. 15 Makassar",
+            "point" => 125,
+            "password" => bcrypt("janedoe")
+        ]);
+        $user->assignRole($role2);
+
+        $user = User::create([
+            'id' => 7,
+            "name" => "Richard Smith",
+            "email" => "richardsmith@gmail.com",
+            "gender" => "male",
+            "place_of_birth" => "Sulawesi Utara",
+            "date_of_birth" => "1998-09-11",
+            "address" => "Jl. Teuku Umar No. 65 Aceh",
+            "point" => 145,
+            "password" => bcrypt("richardsmith")
+        ]);
+        $user->assignRole($role2);
+
+        $user = User::create([
+            'id' => 8,
+            "name" => "Will Monroe",
+            "email" => "willmonroe@gmail.com",
+            "gender" => "male",
+            "place_of_birth" => "Bali",
+            "date_of_birth" => "1968-02-21",
+            "address" => "Jl. Otto Iskandar No. 25 Semarang",
+            "point" => 170,
+            "password" => bcrypt("willmonroe")
+        ]);
+        $user->assignRole($role2);
+
+        $user = User::create([
+            'id' => 9,
+            "name" => "Michael Jordan",
+            "email" => "michaeljordan@yahoo.com",
+            "gender" => "male",
+            "place_of_birth" => "Jawa Tengah",
+            "date_of_birth" => "1968-04-15",
+            "address" => "Jl. D.I Pandjaitan No. 74 Surabaya",
+            "point" => 130,
+            "password" => bcrypt("michaeljordan")
+        ]);
+        $user->assignRole($role2);
+
+        $user = User::create([
+            'id' => 10,
+            "name" => "Andrea Brooke",
+            "email" => "andreabrooke@gmail.com",
+            "gender" => "female",
+            "place_of_birth" => "Banten",
+            "date_of_birth" => "1978-12-10",
+            "address" => "Jl. Cut Nyak Dien No. 74 Banten",
+            "point" => 110,
+            "password" => bcrypt("andreabrooke")
+        ]);
+        $user->assignRole($role2);
+
+        $user = User::create([
+            'id' => 11,
+            "name" => "Anna Williams",
+            "email" => "annawilliams@hotmail.com",
+            "gender" => "female",
+            "place_of_birth" => "Sumatera Barat",
+            "date_of_birth" => "1972-10-05",
+            "address" => "Jl. Thamrin No. 12 Yogyakarta",
+            "point" => 250,
+            "password" => bcrypt("annawilliams")
+        ]);
+        $user->assignRole($role2);
+
+        $user = User::create([
+            'id' => 12,
+            "name" => "Nina Portman",
+            "email" => "ninaportman@outlook.com",
+            "gender" => "female",
+            "place_of_birth" => "Yogyakarta",
+            "date_of_birth" => "1980-09-19",
+            "address" => "Jl. Ir. Djuanda No. 24 Malang",
+            "point" => 190,
+            "password" => bcrypt("ninaportman")
+        ]);
+        $user->assignRole($role2);
+
+        $user = User::create([
+            'id' => 13,
+            "name" => "Mike Lewis",
+            "email" => "mikelewis@mail.com",
+            "gender" => "male",
+            "place_of_birth" => "Jambi",
+            "date_of_birth" => "1990-10-29",
+            "address" => "Jl. Imam Bondjol No. 43 Karawang",
+            "point" => 240,
+            "password" => bcrypt("mikelewis")
         ]);
         $user->assignRole($role2);
     }

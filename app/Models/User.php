@@ -10,6 +10,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+use function PHPUnit\Framework\isNull;
+
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable, HasRoles;
@@ -47,6 +49,24 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function getPhotoAttribute($value)
+    {
+        return $value === null ? 'No Photo' : asset('storage/' . $value);
+    }
+
+    /**
+     * Set the user's password.
+     *
+     * @param string $value
+     * @return void
+     */
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = bcrypt($value);
+    }
+
+    protected $guard_name = 'api';
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
