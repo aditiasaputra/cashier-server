@@ -15,7 +15,6 @@ class HistoryController extends Controller
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
         $this->middleware('jwt.verify', ['only' => ['profile']]);
-        $this->middleware('token.verify');
         $this->middleware(['role:cashier'], ['only' => ['show', 'update', 'destroy']]);
     }
 }

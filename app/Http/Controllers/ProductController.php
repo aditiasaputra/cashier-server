@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -20,7 +21,6 @@ class ProductController extends Controller
     {
         $this->middleware('auth:api');
         $this->middleware('jwt.verify');
-        $this->middleware('token.verify');
         $this->middleware(['role:cashier'], ['only' => ['store', 'update', 'destroy']]);
     }
 
@@ -30,11 +30,13 @@ class ProductController extends Controller
         //     $product = $product->where('name', 'LIKE', '%' . $request->q . '%');
         // })->paginate(10);
 
-        $products = Product::all();
+        $products = Product::select('products.*', 'categories.name as category')->join('categories', 'products.category_id', '=', 'categories.id')->get();
+        // $products = Product::all();
+        $categories = Category::all();
 
         $status = 200;
 
-        return response()->json(compact('products'), $status);
+        return response()->json(compact('products', 'categories'), $status);
     }
 
     public function store(Request $request)
@@ -43,6 +45,7 @@ class ProductController extends Controller
             'name' => 'required|string|between:2,256',
             'category_id' => "required|integer",
             'weight' => "required|integer",
+            'price' => "required|integer",
             'stock' => "required|integer",
             'photo' => 'nullable|image|mimes:jpg,jpeg,png',
         ]);
@@ -91,6 +94,7 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string|between:2,256',
             'category_id' => "nullable|integer",
+            'price' => "nullable|integer",
             'weight' => "nullable|integer",
             'stock' => "nullable|integer",
             'photo' => 'nullable|image|mimes:jpg,jpeg,png',
@@ -121,6 +125,7 @@ class ProductController extends Controller
             $product->name = $request->name;
             $product->category_id = (int) $request->category_id;
             $product->weight = (int) $request->weight;
+            $product->price = (int) $request->price;
             $product->stock = (int) $request->stock;
             $product->photo = $filename;
 

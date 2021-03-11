@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
             "place_of_birth" => "Jakarta",
             "date_of_birth" => "1990-04-22",
             "address" => "Jl. Sultan Agung No 1 Jakarta",
-            "password" => bcrypt("abc123")
+            "password" => "abc123"
         ]);
         $user->assignRole($role1);
 
@@ -43,7 +43,7 @@ class UserSeeder extends Seeder
             "place_of_birth" => "Jawa Barat",
             "date_of_birth" => "1986-12-01",
             "address" => "Jl. D.I Pandjaitan 10 Jakarta",
-            "password" => bcrypt("def123")
+            "password" => "def123"
         ]);
         $user->assignRole($role1);
 
@@ -57,7 +57,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1986-12-01",
             "address" => "Jl. D.I Pandjaitan 10 Jakarta",
             "point" => 200,
-            "password" => bcrypt("aditiasaputra")
+            "password" => "aditiasaputra"
         ]);
         $user->assignRole($role2);
 
@@ -70,7 +70,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1980-10-20",
             "address" => "Jl. Gatot Subroto No. 75 Jakarta",
             "point" => 50,
-            "password" => bcrypt("adamsmith")
+            "password" => "adamsmith"
         ]);
         $user->assignRole($role2);
 
@@ -83,7 +83,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1981-10-20",
             "address" => "Jl. Gatot Subroto No. 100 Bandung",
             "point" => 80,
-            "password" => bcrypt("johndoe")
+            "password" => "johndoe"
         ]);
         $user->assignRole($role2);
 
@@ -96,7 +96,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1978-05-21",
             "address" => "Jl. Sultan Hasannudin No. 15 Makassar",
             "point" => 125,
-            "password" => bcrypt("janedoe")
+            "password" => "janedoe"
         ]);
         $user->assignRole($role2);
 
@@ -109,7 +109,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1998-09-11",
             "address" => "Jl. Teuku Umar No. 65 Aceh",
             "point" => 145,
-            "password" => bcrypt("richardsmith")
+            "password" => "richardsmith"
         ]);
         $user->assignRole($role2);
 
@@ -122,7 +122,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1968-02-21",
             "address" => "Jl. Otto Iskandar No. 25 Semarang",
             "point" => 170,
-            "password" => bcrypt("willmonroe")
+            "password" => "willmonroe"
         ]);
         $user->assignRole($role2);
 
@@ -135,7 +135,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1968-04-15",
             "address" => "Jl. D.I Pandjaitan No. 74 Surabaya",
             "point" => 130,
-            "password" => bcrypt("michaeljordan")
+            "password" => "michaeljordan"
         ]);
         $user->assignRole($role2);
 
@@ -148,7 +148,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1978-12-10",
             "address" => "Jl. Cut Nyak Dien No. 74 Banten",
             "point" => 110,
-            "password" => bcrypt("andreabrooke")
+            "password" => "andreabrooke"
         ]);
         $user->assignRole($role2);
 
@@ -161,7 +161,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1972-10-05",
             "address" => "Jl. Thamrin No. 12 Yogyakarta",
             "point" => 250,
-            "password" => bcrypt("annawilliams")
+            "password" => "annawilliams"
         ]);
         $user->assignRole($role2);
 
@@ -174,7 +174,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1980-09-19",
             "address" => "Jl. Ir. Djuanda No. 24 Malang",
             "point" => 190,
-            "password" => bcrypt("ninaportman")
+            "password" => "ninaportman"
         ]);
         $user->assignRole($role2);
 
@@ -187,7 +187,7 @@ class UserSeeder extends Seeder
             "date_of_birth" => "1990-10-29",
             "address" => "Jl. Imam Bondjol No. 43 Karawang",
             "point" => 240,
-            "password" => bcrypt("mikelewis")
+            "password" => "mikelewis"
         ]);
         $user->assignRole($role2);
     }

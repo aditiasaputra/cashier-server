@@ -21,7 +21,6 @@ class TransactionController extends Controller
     {
         $this->middleware('auth:api');
         $this->middleware('jwt.verify');
-        $this->middleware('token.verify');
         $this->middleware(['role:cashier'], ['only' => ['show', 'update', 'destroy']]);
     }
 

@@ -21,7 +21,6 @@ class UserController extends Controller
     {
         $this->middleware('auth:api');
         $this->middleware('jwt.verify');
-        // $this->middleware('token.verify');
         $this->middleware(['role:cashier']);
     }
 
