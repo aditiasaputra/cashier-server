@@ -24,6 +24,8 @@ class CreateTransactionsTable extends Migration
             $table->integer('quantity');
             $table->integer('price');
             $table->integer('total');
+            $table->integer('payment')->nullable();
+            $table->integer('change')->nullable();
             $table->timestamps();
         });
     }

@@ -1,5 +1,5 @@
 # Laravel Cashier Apps (RESTFul API)
-
+----------
 This project is RESTFUL API and  was created using : 
 
   - laravel
@@ -16,8 +16,8 @@ This project is RESTFUL API and  was created using :
   - `php artisan jwt:secret`
   - `php artisan migrate --seed`
   - `php artisan serve`
- 
-  
+
+
 
 Please use software like postman, insomnia or anything to communicated HTTP protocol.
 

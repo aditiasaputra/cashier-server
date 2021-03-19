@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Prefix;
-use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Models\{User, Transaction};
+use App\Models\{User, Product, Transaction};
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -26,11 +25,13 @@ class TransactionController extends Controller
 
     public function index(Request $request)
     {
-        $transactions = Transaction::all()->latest();
+        $users = User::select('users.*', 'roles.name as role')->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')->join('roles', 'model_has_roles.role_id', '=', 'roles.id')->where('roles.name', 'customer')->get();
+        $products = Product::select('products.*', 'categories.name as category')->join('categories', 'products.category_id', '=', 'categories.id')->get();
+        $transactions = Transaction::select('transactions.*', 'products.name as product', 'users.name as customer_name')->join('products', 'transactions.product_id', '=', 'products.id')->join('users', 'transactions.user_id', '=', 'users.id')->get();
 
         $status = 200;
 
-        return response()->json(compact('transactions'), $status);
+        return response()->json(compact('users', 'products', 'transactions'), $status);
     }
 
     public function store(Request $request)
@@ -43,6 +44,8 @@ class TransactionController extends Controller
             'quantity' => "required|integer",
             'price' => "required|integer",
             'total' => "required|integer",
+            'payment' => "required|integer",
+            'change' => "required|integer",
         ]);
 
         if ($validator->fails()) {
@@ -65,9 +68,9 @@ class TransactionController extends Controller
         $product->decrement('stock', $request->quantity);
         $product->save();
 
-        // Give User point +5
+        // Give increment 5 point user
         $user = User::find($request->user_id);
-        $user->point += 5;
+        $user->increment('point', 5);
         $user->save();
 
         $message = 'Transaction succesfully created!';

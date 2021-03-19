@@ -24,22 +24,17 @@ class ClaimGiftController extends Controller
 
     public function index(Request $request)
     {
-        $claim_gifts = ClaimGift::all()->latest();
+        $gifts = Gift::all();
+        $users = User::select('users.*', 'roles.name as role')->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')->join('roles', 'model_has_roles.role_id', '=', 'roles.id')->where('roles.name', 'customer')->get();
+        $claim_gifts = ClaimGift::select('claim_gifts.*', 'gifts.name as gift_name', 'users.name as customer_name')->join('gifts', 'claim_gifts.gift_id', '=', 'gifts.id')->join('users', 'claim_gifts.user_id', '=', 'users.id')->get();
 
         $status = 200;
 
-        return response()->json(compact('claim_gifts'), $status);
+        return response()->json(compact('users', 'gifts', 'claim_gifts'), $status);
     }
 
     public function store(Request $request)
     {
-        $gift = Gift::find($request->gift_id);
-        $user = User::find($request->user_id);
-
-        if ($user->point < $gift->point) {
-            return response()->json(['message' => 'You\'ve not enough points!']);
-        }
-
         $validator = Validator::make($request->all(), [
             'gift_id' => "required|integer",
             'user_id' => "required|integer",
@@ -51,7 +46,14 @@ class ClaimGiftController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        $claim_gift = ClaimGift::create(array_merge($validator->validated()));
+        $gift = Gift::find((int) $request->gift_id);
+        $user = User::find((int) $request->user_id);
+
+        if ($user->point < $gift->point) {
+            return response()->json(['message' => 'You\'ve not enough points!']);
+        }
+
+        ClaimGift::create(array_merge($validator->validated()));
 
         // Decrement user point
         $user->decrement('point', (int) $request->total_point);
